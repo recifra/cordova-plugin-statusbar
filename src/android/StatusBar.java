@@ -52,6 +52,7 @@ public class StatusBar extends CordovaPlugin {
     private static final String STYLE_DEFAULT = "default";
     private static final String STYLE_LIGHT_CONTENT = "lightcontent";
 
+    private String lastStatusBarStyle = null;
     private AppCompatActivity activity;
     private Window window;
 
@@ -86,6 +87,14 @@ public class StatusBar extends CordovaPlugin {
                 preferences.getString("StatusBarStyle", STYLE_LIGHT_CONTENT).toLowerCase()
             );
         });
+    }
+
+    @Override
+    public Object onMessage(String id, Object data) {
+        if (id == "onSplashScreenHide" && lastStatusBarStyle != null) {
+            activity.runOnUiThread(() -> setStatusBarStyle(lastStatusBarStyle));
+        }
+        return super.onMessage(id, data);
     }
 
     /**
@@ -207,7 +216,9 @@ public class StatusBar extends CordovaPlugin {
                 windowInsetsControllerCompat.setAppearanceLightStatusBars(false);
             } else {
                 LOG.e(TAG, "Invalid style, must be either 'default' or 'lightcontent'");
+                return;
             }
+            this.lastStatusBarStyle = style;
         }
     }
 }
